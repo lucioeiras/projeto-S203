@@ -13,9 +13,13 @@ class UserController {
   async find(request, response) {
     const { id } = request.params;
 
-    const user = await User.findOne({ where: { id } });
+    try {
+      const user = await User.findOne({ where: { id } });
 
-    return response.json(user);
+      return response.json(user);
+    } catch (err) {
+      return response.status(404).json({ message: "User not found" });
+    }
   }
 
   async create(request, response) {
@@ -36,35 +40,47 @@ class UserController {
     const { id } = request.params;
     const { username, email } = request.body;
 
-    await User.update({ username, email }, { where: { id } });
+    try {
+      await User.update({ username, email }, { where: { id } });
 
-    return response.status(204).send();
+      return response.status(204).send();
+    } catch (err) {
+      return response.status(404).json({ message: "User not found" });
+    }
   }
 
   async delete(request, response) {
     const { id } = request.params;
 
-    await User.destroy({ where: { id } });
+    try {
+      await User.destroy({ where: { id } });
 
-    return response.status(204).send();
+      return response.status(204).send();
+    } catch (err) {
+      return response.status(404).json({ message: "User not found" });
+    }
   }
 
   async login(request, response) {
     const { email, password } = request.body;
 
-    const user = await User.findOne({ where: { email } });
+    try {
+      const user = await User.findOne({ where: { email } });
 
-    if (!(await compare(password, user.password))) {
-      return response.status(401).json({ message: "Senha incorreta" });
+      if (!(await compare(password, user.password))) {
+        return response.status(401).json({ message: "Senha incorreta" });
+      }
+
+      const token = jwt.sign(
+        { user: JSON.stringify(user) },
+        process.env.PRIVATE_KEY,
+        { expiresIn: "7d" },
+      );
+
+      return response.json({ user, token });
+    } catch (err) {
+      return response.status(404).json({ message: "User not found" });
     }
-
-    const token = jwt.sign(
-      { user: JSON.stringify(user) },
-      process.env.PRIVATE_KEY,
-      { expiresIn: "7d" },
-    );
-
-    return response.json({ user, token });
   }
 }
 

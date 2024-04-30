@@ -10,9 +10,13 @@ class MovieController {
   async find(request, response) {
     const { id } = request.params;
 
-    const movies = await Movie.findOne({ where: { id } });
+    try {
+      const movies = await Movie.findOne({ where: { id } });
 
-    return response.json(movies);
+      return response.json(movies);
+    } catch (err) {
+      return response.status(404).json({ message: "Movie not found" });
+    }
   }
 
   async create(request, response) {
@@ -33,20 +37,28 @@ class MovieController {
     const { id } = request.params;
     const { name, description, score, genre, director } = request.body;
 
-    await Movie.update(
-      { name, description, score, genre, director },
-      { where: { id } },
-    );
+    try {
+      await Movie.update(
+        { name, description, score, genre, director },
+        { where: { id } },
+      );
 
-    return response.status(204).send();
+      return response.status(204).send();
+    } catch (err) {
+      return response.status(404).json({ message: "Movie not found" });
+    }
   }
 
   async delete(request, response) {
     const { id } = request.params;
 
-    await Movie.destroy({ where: { id } });
+    try {
+      await Movie.destroy({ where: { id } });
 
-    return response.status(204).send();
+      return response.status(204).send();
+    } catch (err) {
+      return response.status(404).json({ message: "Movie not found" });
+    }
   }
 }
 
