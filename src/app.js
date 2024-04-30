@@ -14,5 +14,7 @@ app.use(Express.json());
 app.use(routes);
 
 app.listen(3333, () =>
-  console.log("🚀 Server started at http://localhost:3333"),
+  console.log(
+    `🚀 Server started at http://${process.env.NODE_ENV === "prod" ? process.env.PROD_URL : "localhost"}:3333`,
+  ),
 );
