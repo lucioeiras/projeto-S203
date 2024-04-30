@@ -16,6 +16,10 @@ userRouter.post("/user", (request, response) =>
   UserController.create(request, response),
 );
 
+userRouter.post("/user/login/", (request, response) =>
+  UserController.login(request, response),
+);
+
 userRouter.put("/user/:id", (request, response) =>
   UserController.update(request, response),
 );

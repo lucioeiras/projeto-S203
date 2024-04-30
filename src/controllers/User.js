@@ -1,4 +1,5 @@
-import { hash } from "bcrypt";
+import { hash, compare } from "bcrypt";
+import jwt from "jsonwebtoken";
 
 import { User } from "../models/User.js";
 
@@ -46,6 +47,24 @@ class UserController {
     await User.destroy({ where: { id } });
 
     return response.status(204).send();
+  }
+
+  async login(request, response) {
+    const { email, password } = request.body;
+
+    const user = await User.findOne({ where: { email } });
+
+    if (!(await compare(password, user.password))) {
+      return response.status(401).json({ message: "Senha incorreta" });
+    }
+
+    const token = jwt.sign(
+      { user: JSON.stringify(user) },
+      process.env.PRIVATE_KEY,
+      { expiresIn: "7d" },
+    );
+
+    return response.json({ user, token });
   }
 }
 
