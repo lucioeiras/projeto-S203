@@ -1,3 +1,5 @@
+import { validate } from "uuid";
+
 import { Movie } from "../models/Movie.js";
 
 class MovieController {
@@ -10,13 +12,17 @@ class MovieController {
   async find(request, response) {
     const { id } = request.params;
 
-    try {
-      const movies = await Movie.findOne({ where: { id } });
+    if (!validate(id)) {
+      return response.status(404).json({ message: "Invalid ID" });
+    }
 
-      return response.json(movies);
-    } catch (err) {
+    const movie = await Movie.findOne({ where: { id } });
+
+    if (!movie) {
       return response.status(404).json({ message: "Movie not found" });
     }
+
+    return response.json(movie);
   }
 
   async create(request, response) {
@@ -37,6 +43,10 @@ class MovieController {
     const { id } = request.params;
     const { name, description, score, genre, director } = request.body;
 
+    if (!validate(id)) {
+      return response.status(404).json({ message: "Invalid ID" });
+    }
+
     try {
       await Movie.update(
         { name, description, score, genre, director },
@@ -51,6 +61,10 @@ class MovieController {
 
   async delete(request, response) {
     const { id } = request.params;
+
+    if (!validate(id)) {
+      return response.status(404).json({ message: "Invalid ID" });
+    }
 
     try {
       await Movie.destroy({ where: { id } });

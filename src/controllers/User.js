@@ -1,5 +1,6 @@
 import { hash, compare } from "bcrypt";
 import jwt from "jsonwebtoken";
+import { validate } from "uuid";
 
 import { User } from "../models/User.js";
 
@@ -13,13 +14,17 @@ class UserController {
   async find(request, response) {
     const { id } = request.params;
 
-    try {
-      const user = await User.findOne({ where: { id } });
+    if (!validate(id)) {
+      return response.status(404).json({ message: "Invalid ID" });
+    }
 
-      return response.json(user);
-    } catch (err) {
+    const user = await User.findOne({ where: { id } });
+
+    if (!user) {
       return response.status(404).json({ message: "User not found" });
     }
+
+    return response.json(user);
   }
 
   async create(request, response) {
@@ -40,6 +45,10 @@ class UserController {
     const { id } = request.params;
     const { username, email } = request.body;
 
+    if (!validate(id)) {
+      return response.status(404).json({ message: "Invalid ID" });
+    }
+
     try {
       await User.update({ username, email }, { where: { id } });
 
@@ -51,6 +60,10 @@ class UserController {
 
   async delete(request, response) {
     const { id } = request.params;
+
+    if (!validate(id)) {
+      return response.status(404).json({ message: "Invalid ID" });
+    }
 
     try {
       await User.destroy({ where: { id } });
